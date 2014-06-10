@@ -13,11 +13,13 @@ from sfr_constants import *
 import sys
 import time
 
+print 'Number of arguments:', len(sys.argv), 'arguments.'
+print 'Argument List:', str(sys.argv)
 #-------------- USB init required --------
 usb = init()			# init the USB IO board
 #---------------
 print module_version()		# print python module version
-print rom_version(usb)		# print rom version
+# print rom_version(usb)		# print rom version
 print "----------- output ------------"
 
 #---- SPI SFR constants --------------
@@ -52,4 +54,18 @@ def my_pwm_init(duty_cycle):
 
 # initialize the registers needed for PWM output
 # RD5 pin should measure 50% of 3.3 volts
-my_pwm_init(0x64)		# 50% duty cycle @3.750khz
+duty=int(sys.argv[1])
+my_pwm_init(duty)		# 50% duty cycle @3.750khz
+state = 1
+while True:
+	# print "+ %d" % (duty)
+	sfr_set_reg(usb, pwm.CCPR1L, duty)
+
+	if state == 1:
+		if duty < 255:
+			duty += 1
+		else: state = 0
+	else:
+		if duty > 1:
+			duty -= 1
+		else: state = 1
